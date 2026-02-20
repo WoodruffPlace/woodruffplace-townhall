@@ -36,7 +36,6 @@ defined("SITEROOT")
  */
 require_once(LIBRARIES . '/stripe-php-master/init.php');
 require_once(LIBRARIES . '/php-mailer/phpmail.php');
-require_once(LIBRARIES . '/google-api-php-client-v2.18.3-PHP8.3/vendor/autoload.php');
 
 /**
  * CLASSES

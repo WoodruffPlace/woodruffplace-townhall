@@ -112,7 +112,7 @@ class Request
 	 */
 	function request_get_sessions()
 	{
-		$query = "SELECT eventID FROM event_sessions WHERE requestID = '".$this->requestID."'";
+		$query = "SELECT eventID FROM event_sessions WHERE requestID = '".$this->requestID."' ORDER BY event_start ASC";
 		$result = $this->db->fetch_assoc($this->db->query($query));
 		if (!empty($result))
 		{

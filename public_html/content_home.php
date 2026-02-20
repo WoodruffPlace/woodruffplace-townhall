@@ -32,7 +32,7 @@ if (isset($_POST['login_submit']))
 		<div class="mast-hero-image"></div>
 		<div class="mast-hero-content">
 			<div class="logo"><img src="/img/logo_wp.svg" alt="Woodruff Place logo"></div>
-			<div class="heading"><h1><span class="heading-em3">Welcome to the</span> <span class="heading-em1">Woodruff Place Town Hall</span> <span class="heading-em2">Reservation Portal</span></h1></div>
+			<div class="heading"><h1><span class="heading-em3">Welcome to the</span> <span class="heading-em1">Woodruff Place <span class="d-block">Town Hall</span></span> <span class="heading-em2">Reservation Portal</span></h1></div>
 		</div>
 		<div class="content-main">
 			<div class="container-xl mt-3 mt-md-4 mt-lg-5 pt-lg-3">
@@ -46,7 +46,7 @@ if (isset($_POST['login_submit']))
 									<div class="mt-1 mb-5 pb-lg-4"><a href="/new" class="btn btn-primary d-block fs-5 py-lg-3">Submit request</a></div>
 								</div>
 							</div>
-							<p>Need to manage reservatiions?</p>
+							<p>Need to manage reservations?</p>
 							<div class="row pb-5">
 								<div class="col-12">
 									<div class="mt-1">

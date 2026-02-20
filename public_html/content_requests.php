@@ -41,7 +41,7 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 						<p class="my-0 fw-bold">Contact</p>
 					</div>
 					<div class="col-4">
-						<p class="my-0 fw-bold">Dates/times</p>
+						<p class="my-0 fw-bold">Sessions</p>
 					</div>
 				</div>
 				<?php
@@ -73,7 +73,7 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 									<button class="accordion-button collapsed border border-secondary-subtle rounded-4" type="button" data-bs-toggle="collapse" data-bs-target="#requests_list_<?php echo $requestID; ?>" aria-expanded="false" aria-controls="requests_list_<?php echo $requestID; ?>">Details</button>
 								</h2>
 								<div id="requests_list_<?php echo $requestID; ?>" class="accordion-collapse collapse d-lg-block" data-bs-parent="#accordionFlushExample">
-									<div class="accordion-body px-0">
+									<div class="accordion-body px-lg-0">
 										<?php
 										$sessions = $request->request_get_sessions();
 										foreach ($sessions as $session):
