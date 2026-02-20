@@ -1,0 +1,38 @@
+AddType image/svg+xml svg svgz
+AddEncoding gzip svgz
+
+# DISABLE DIRECTORY INDEXES
+Options -Indexes
+
+# Cache options
+
+<IfModule mod_headers.c>
+	Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=86400"
+	Header set Pragma "no-cache"
+	Header set Expires 0
+</IfModule>
+
+RewriteEngine on
+
+# Redirect "www" hostname to apex
+RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+RewriteRule ^(.*)$ https://%1%{REQUEST_URI} [R=301,QSA,NC,L]
+
+# Redirect http to https
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Rewrite API URLs to API page
+RewriteRule ^api/(.*)$			_api.php [L,QSA]
+
+# Rewrite webhook calls to Webhook page
+RewriteRule ^webhook(/?)(.*)$		_webhook.php [L,QSA]
+
+# Power the login key URL
+RewriteRule ^login/auth/(.*)$	_auth.php?key=$1 [L,QSA]
+
+# Direct all traffic to index page
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !=/favicon.ico
+RewriteRule (.*)$ 				index.php [L,QSA]

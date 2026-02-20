@@ -1,0 +1,39 @@
+// SASS Imports
+// https://sass-guidelin.es/#the-7-1-pattern
+
+// Sass modules
+@use "sass:color";
+@use "sass:map";
+
+// Import first to font-language-override
+@import 'scss/vendor/bootstrap-5.3.6/functions';
+@import 'scss/vendor/bootstrap-5.3.6/variables';
+
+// Abstracts
+@import 'scss/abstracts/variables';
+@import 'scss/abstracts/mixins';
+
+// Vendor
+@import 'scss/vendor/bootstrap-5.3.6/bootstrap';
+@import "scss/vendor/bootstrap-icons-1.13.1/bootstrap-icons";
+
+// Base
+@import 'scss/base/fonts';
+@import 'scss/base/text';
+// @import 'scss/base/colors';
+// @import 'scss/base/utilities';
+// @import 'scss/base/images';
+// @import 'scss/base/accessibility';
+
+// Layout
+@import 'scss/layout/main';
+@import 'scss/layout/header';
+@import 'scss/layout/forms';
+
+// Components
+@import 'scss/components/alert';
+@import 'scss/components/wp_btn-check';
+
+// Theme
+@import 'scss/theme/landing';
+@import 'scss/theme/wp_th_pay';

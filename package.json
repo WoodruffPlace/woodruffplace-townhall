@@ -1,0 +1,25 @@
+{
+  "name": "Woodruff Place",
+  "version": "1.0.0",
+  "description": "Town Hall Rental Request",
+  "main": "index.php",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Scotty Z. Wilson",
+  "license": "ISC",
+  "homepage": "https://woodruffplace.org",
+  "devDependencies": {
+    "files-exist": "^1.1.0",
+    "gulp": "^4.0.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-dart-sass": "^1.0.2",
+    "gulp-rename": "^2.0.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "gulp-uglify": "^3.0.2"
+  }
+}

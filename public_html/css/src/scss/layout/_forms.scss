@@ -1,0 +1,20 @@
+.was-validated .form-control:valid
+{
+	background-image: none;
+}
+.wp-form-check
+{
+	width: 1.5rem;
+	height: 1.5rem;
+	border: solid 1px $primary;
+	accent-color: $primary;
+	&:checked
+	{
+		background-color: $primary;
+		border-color: $primary;
+	}
+	& + .form-check-label
+	{
+		padding-top: 0.25rem;
+	}
+}

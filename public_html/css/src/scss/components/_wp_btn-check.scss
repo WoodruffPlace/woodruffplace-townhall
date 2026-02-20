@@ -1,0 +1,53 @@
+.wp_btn-check
+{
+	border-radius: 10px !important;
+	border-color: $gray-200;
+	border-width: 2px;
+
+	&:hover
+	{
+		border-color: $gray-300;
+
+		.wp_icon_default
+		{
+			color: $gray-400;
+		}
+	}
+
+	.wp_icon_default
+	{
+		color: $gray-300;
+	}
+
+	&:has(input:checked)
+	{
+		border-color: $primary;
+		border-width: 2px;
+
+		.wp_icon_checked
+		{
+			display: block;
+			color: $primary;
+		}
+		.wp_icon_default
+		{
+			display: none;
+		}
+	}
+	.wp_icon_checked
+	{
+		display: none;
+	}
+
+	&.success
+	{
+		&:has(input:checked)
+		{
+			border-color: $green-500;
+			.wp_icon_checked
+			{
+				color: $green-500;
+			}
+		}
+	}
+}

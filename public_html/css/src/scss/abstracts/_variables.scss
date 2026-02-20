@@ -1,0 +1,134 @@
+@use "sass:map";
+
+// Layout settings
+$header-height-sm: 56px;
+$header-height-lg: 72px;
+$header-height-sm-scrolled: 56px;
+$header-height-lg-scrolled: 56px;
+
+$global-gutter-small: 16px;
+$global-gutter-medium: 16px;
+
+// Colors
+$color-white: rgb(255,255,255);
+$color-black: rgb(0,0,0);
+$color-grey-light: rgb(235,235,235);
+$color-grey-medium: rgb(150,150,150);
+$color-grey-medium-dark: rgb(100,100,100);
+$color-grey-dark: rgb(42,49,51);
+$color-text-main: #1a1a1a;
+$color-page-background: rgb(245, 245, 245);
+$color-page-background-fade: rgba(24,27,32, 0.8);
+
+// Woodruff Place colors
+$color-woodruff-blue: #2f608e;
+
+$theme-colors: (
+  "primary":    $blue-700,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark,
+);
+
+// Text styles
+$font-family-heading: "Kameron", serif;
+
+
+// Transitions
+$base-transition-duration: 0.2s;
+$base-transition-duration: 0.35s;
+$base-transition-function: ease-in-out;
+$base-transition: $base-transition-duration $base-transition-function;
+
+// Bootstrap settings
+$enable-negative-margins: true;
+
+// Override Bootstrap defaults
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1152px,
+ xxl: 1500px
+) !default;
+$container-max-widths: (
+  sm: 544px,
+  md: 736px,
+  lg: 992px,
+  xl: 1120px,
+ xxl: 1468px
+) !default;
+
+// Alerts
+$alert-border-scale: -10% !default; // Deprecated in v5.2.0, to be removed in v6
+
+$alert-border-scale: -80% !default;
+
+// Buttons
+$btn-border-radius: 2rem;
+$btn-border-radius-sm: 2rem;
+$btn-border-radius-lg: 2rem;
+
+// Bootstrap icons
+$bootstrap-icons-font-dir: "../fonts/bootstrap-icons-1.13.1/fonts";
+
+
+// Change the gutters and grid to match the 8pt grid
+$grid-gutter-width: 32px;
+
+
+// Extend Bootstrap font sizes
+$font-size-base:              1rem !default;
+$h1-font-size:                $font-size-base * 2.5 !default;
+$h2-font-size:                $font-size-base * 2 !default;
+$h3-font-size:                $font-size-base * 1.75 !default;
+$h4-font-size:                $font-size-base * 1.5 !default;
+$h5-font-size:                $font-size-base * 1.25 !default;
+$h6-font-size:                $font-size-base !default;
+// scss-docs-end font-variables
+
+// scss-docs-start font-sizes
+$font-sizes: (
+  0: $font-size-base * 3,
+  1: $h1-font-size,
+  2: $h2-font-size,
+  3: $h3-font-size,
+  4: $h4-font-size,
+  5: $h5-font-size,
+  6: $h6-font-size,
+  7: ($font-size-base * 0.85),
+  8: ($font-size-base * 0.65),
+  9: ($font-size-base * 0.5)
+);
+// scss-docs-end font-size
+
+
+// Tabs
+$nav-link-color: $primary;
+$nav-link-hover-color: darken($primary, 15%);
+$nav-tabs-link-active-bg: rgb(248, 249, 250);
+
+// Accordion
+$accordion-button-active-bg: darken($primary, 8%);
+$accordion-button-active-color: $white;
+
+
+// $spacer: 1rem !default;
+// $spacers: () !default;
+// $spacers: map-merge(
+//   (
+// 	6: ($spacer * 4.5),
+// 	7: ($spacer * 6)
+// 	),
+//   $spacers
+// );
+
+// // Global border radius / rounded corners
+// $border-radius: 0;
+// $border-radius-lg: 0;
+// $border-radius-sm: 0;

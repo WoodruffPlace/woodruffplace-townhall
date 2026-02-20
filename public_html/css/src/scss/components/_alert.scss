@@ -1,0 +1,17 @@
+.alert
+{
+	background: transparent !important;
+
+	&.icon-present
+	{
+		padding-left: 0;
+		border-left-width: 3rem;
+	}
+}
+
+@each $state in map-keys($theme-colors) {
+  .alert-#{$state} {
+	--#{$prefix}alert-border-color: var(--#{$prefix}#{$state});
+	border-width: 2px;
+  }
+}

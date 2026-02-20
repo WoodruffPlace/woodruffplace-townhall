@@ -1,0 +1,130 @@
+.landing
+{
+	.mast-hero
+	{
+		background-color: $secondary;
+		width: 100vw;
+		height: 320px;
+		display: flex;
+		flex-direction: column;
+		background-image: url('/img/townhall.jpg');
+		background-size: cover;
+		background-position: 50% 50%;
+
+		@include media-breakpoint-up(lg)
+		{
+			flex-direction: row;
+			width: 50vw;
+			height: 100vh;
+		}
+	}
+	.mast-hero-image
+	{
+		@include media-breakpoint-up(lg)
+		{
+			flex: 1 0 100%;
+		}
+	}
+	.mast-hero-content
+	{
+		display: flex;
+		flex: 1 0 100%;
+	}
+	.logo
+	{
+		flex: 1 0 25%;
+		max-width: 140px;
+		margin: 0.75rem 1.4rem 0 1rem;
+
+		@include media-breakpoint-up(lg)
+		{
+			margin-left: -4rem;
+			max-width: 160px;
+		}
+	}
+	.heading
+	{
+		font-family: "Montserrat", sans-serif;
+		padding: 0.5rem 0.5rem 0 0;
+		color: $white;
+		text-shadow: 0 0 10px rgba(0,0,0,0.75);
+
+		@include media-breakpoint-up(md)
+		{
+			margin-top: 3vw;
+		}
+		@include media-breakpoint-up(lg)
+		{
+			margin-top: 0;
+			color: $black;
+			text-shadow: none;
+			margin-left: 1rem;
+		}
+		@include media-breakpoint-up(xxl)
+		{
+			margin-left: 2rem;
+		}
+
+		.heading-em1
+		{
+			font-size: 8.5vw;
+			font-weight: 900;
+			line-height: 1;
+			display: block;
+			@include media-breakpoint-up(md)
+			{
+				font-size: 6vw;
+			}
+			@include media-breakpoint-up(lg)
+			{
+				max-width: 90%;
+				font-size: 3.25rem;
+			}
+		}
+		.heading-em2
+		{
+			font-size: 6vw;
+			display: block;
+			font-weight: 300;
+			padding: 0.1rem 0 0 40vw;
+
+			@include media-breakpoint-up(md)
+			{
+				font-size: 4vw;
+				padding-left: 50vw;
+			}
+			@include media-breakpoint-up(lg)
+			{
+				text-align: left;
+				padding-right: 0;
+				padding-left: 0.5rem;
+				font-size: 1.85rem;
+			}
+		}
+		.heading-em3
+		{
+			font-size: 1rem;
+			font-weight: 400;
+		}
+	}
+	.font-alt
+	{
+		font-family: "Montserrat", sans-serif;
+	}
+	.content-main
+	{
+		@include media-breakpoint-up(lg)
+		{
+			position: absolute;
+			left: 50%;
+			width: 48%;
+			max-width: 625px;
+			top: 200px;
+		}
+	}
+	.home-h2
+	{
+		font-weight: 800;
+		font-size: 2rem;
+	}
+}
