@@ -30,7 +30,7 @@ class API
 				$event_return['session_end_date']			= date('Y-m-d', strtotime($event->event_get('event_end')));
 				$event_return['session_end_time']			= date('H:i:s', strtotime($event->event_get('event_end')));
 				$event_return['session_fee_rental']			= $event->event_get('fee_rental');
-				$event_return['session_fee_alcohol']		= ($event->event_get('fee_alcohol') == '0' ? "n" : "y");
+				$event_return['session_fee_alcohol']		= ($event->event_get('fee_alcohol') == '0' || empty($event->event_get('fee_alcohol')) ? "n" : "y");
 				$event_return['session_fee_waiver_rental']	= ($event->event_get('fee_waiver_rental') == '1' ? "y" : "n");
 				$event_return['session_fee_waiver_alcohol']	= ($event->event_get('fee_waiver_alcohol') == '1' ? "y" : "n");
 				return json_encode($event_return);

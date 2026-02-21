@@ -20,6 +20,11 @@ if (Request::request_is_valid($id))
 	// Create customer
 	$customer = new Customer($request->request_get('customer'));
 }
+else
+{
+	header("Location: /requests");
+	exit;
+}
 
 /**
  *  Handle editing
@@ -697,7 +702,7 @@ if (isset($_SESSION['alert']))
 										<button type="button" class="btn btn-outline-secondary btn-sm px-3" data-name="form_block_session_remove_trigger" data-bs-toggle="dropdown" aria-expanded="false"><span class="bi bi-three-dots"></span></button>
 										<ul class="dropdown-menu">
 											<li>
-												<button type="button" class="dropdown-item form_block_session_edit" data-bs-toggle="modal" data-bs-target="#modal_session_add_edit" data-bs-action="edit" data-bs-itemtoedit="<?php echo $event->event_get('eventID'); ?>"><span class="bi bi-pencil me-2 text-primary"></span> Edit</button>
+												<button type="button" class="dropdown-item form_block_event_session_edit" data-bs-toggle="modal" data-bs-target="#modal_session_add_edit" data-bs-action="edit" data-bs-itemtoedit="<?php echo $event->event_get('eventID'); ?>"><span class="bi bi-pencil me-2 text-primary"></span> Edit</button>
 											</li>
 											<li>
 												<input type="hidden" name="session" value="">

@@ -65,9 +65,6 @@ class FormProcessor
 
 				// Empty the temp array
 				$temp_sessions = [];
-				//header("Location: " . $_SERVER['REQUEST_URI']);
-				// Important: terminate script execution after redirect
-				//exit();
 			}
 			else
 			{
@@ -240,6 +237,11 @@ class FormProcessor
 			{
 				Event::event_update_session('fee_waiver_rental', "1", $eventID);
 				Event::event_update_session('fee_waiver_alcohol', "1", $eventID);
+			}
+			// Waive the rental fee for duplicate requests on one day
+			if (isset($session['rental_waived']) && $session['rental_waived'] == '1')
+			{
+				Event::event_update_session('fee_waiver_rental', "1", $eventID);
 			}
 			array_push($events, $eventID);
 		}

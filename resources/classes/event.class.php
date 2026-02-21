@@ -264,4 +264,144 @@ class Event
 		global $db;
 		$data = $db->safe_execute("DELETE FROM event_sessions WHERE eventID = ?", "i", $eventID);
 	}
+
+
+	/**
+	 *  Accept events as inputs and return whether there are overlapping
+	 *  Accepts an associative array of start/end date pairs
+	 *  Returns the date of the duplicated session
+	 */
+	public static function events_multiple_per_day($sessions)
+	{
+		// Iterate and create an array of dates
+		$ranges = Array();
+		$return = false;
+		foreach ($sessions as $key => $session)
+		{
+			$temp = Array();
+			$temp['key'] = $key;
+			$temp['start'] = date('Y-m-d', strtotime($session['session_start_date'])) . ' ' . date('g:i a', strtotime($session['session_start_time']));
+			$temp['end'] = date('Y-m-d', strtotime($session['session_end_date'])) . ' ' . date('g:i a', strtotime($session['session_end_time']));
+			array_push($ranges, $temp);
+			unset($temp);
+		}
+
+		// Iterate over the ranges
+		$tracker = Array();
+
+		foreach ($ranges as $pair)
+		{
+			if (in_array(date('Y-m-d', strtotime($pair['start'])), $tracker))
+			{
+				$return = date('Y-m-d', strtotime($pair['start']));
+			}
+			else
+			{
+				array_push($tracker, date('Y-m-d', strtotime($pair['start'])));
+			}
+		}
+		return $return;
+	}
+
+
+	public static function should_be_discounted($date, $this_session, $sessions)
+	{
+		$price_highest = 0;
+		$this_price = new Price($this_session['session_attendance']);
+		$date_match = false;
+		foreach ($sessions as $key => $session)
+		{
+			$price = new Price($session['session_attendance']);
+			if ($session['session_start_date'] == $date && $date == $this_session['session_start_date'])
+			{
+				$date_match = true;
+			}
+			if ($price->price_get('amount') > $price_highest)
+			{
+				$price_highest = $price->price_get('amount');
+			}
+			// else if ($price->price_get('amount') == $price_highest && )
+			// {
+			// 	return false;
+			// }
+		}
+		//echo $this_price->price_get('amount');
+		//echo $price_highest;
+		return ($date_match && $this_price->price_get('amount') <= $price_highest) ? true : false;
+	}
+
+
+
+	public static function event_return_sessions_discounted($sessions)
+	{
+		$waived = Array();
+		foreach ($sessions as $key => $session)
+		{
+			foreach ($sessions as $subkey => $subsession)
+			{
+				//echo $subkey;
+				if ($key == $subkey)
+				{
+					continue;
+				}
+				else if ($session['session_start_date'] == $subsession['session_start_date'])
+				{
+					$session_price = new Price($session['session_attendance']);
+					$subsession_price = new Price ($subsession['session_attendance']);
+					if ($session_price->price_get('amount') <= $subsession_price->price_get('amount') &&
+					!(in_array($subkey, $waived))
+					)
+					{
+						array_push($waived, $key);
+					}
+				}
+			}
+		}
+		return $waived;
+	}
+
+
+	/**
+	 *  Accept events as inputs and return whether there are overlapping
+	 *  Aceepts an associative array of start/end date pairs
+	 */
+	public static function events_are_overlapping($sessions)
+	{
+		// Iterate and create an array of dates
+		$ranges = Array();
+		foreach ($sessions as $key => $session)
+		{
+			$temp = Array();
+			$temp['key'] = $key;
+			$temp['start'] = date('Y-m-d', strtotime($session['session_start_date'])) . ' ' . date('g:i a', strtotime($session['session_start_time']));
+			$temp['end'] = date('Y-m-d', strtotime($session['session_end_date'])) . ' ' . date('g:i a', strtotime($session['session_end_time']));
+			array_push($ranges, $temp);
+			unset($temp);
+		}
+
+		// 1. Sort the ranges by their start times
+		usort($ranges, function ($a, $b)
+		{
+			// Convert string dates to timestamps for reliable comparison
+			return strtotime($a['start']) <=> strtotime($b['start']);
+		});
+
+		// 2. Iterate through the sorted ranges, comparing each with the next one
+		$count = count($ranges);
+		for ($i = 0; $i < $count - 1; $i++)
+		{
+			$current = $ranges[$i];
+			$next = $ranges[$i + 1];
+
+			// 3. Check for overlap between current and next range
+			// An overlap occurs if the current range's end time is after the next range's start time
+			if (strtotime($current['end']) > strtotime($next['start']))
+			{
+				// Overlap found
+				return true;
+			}
+		}
+		// No overlaps found in the entire list
+		return false;
+	}
 }

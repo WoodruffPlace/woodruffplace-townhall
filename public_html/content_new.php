@@ -264,6 +264,16 @@ if (isset($_SESSION['alert']))
 					<!-- Sessions list -->
 					<div class="row my-4">
 						<div class="col-12">
+							<?php if (Event::events_are_overlapping($_SESSION['form']['sessions'])): ?>
+							<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+								<p class="my-0 fs-7 fw-bold">You have overlapping events. Is this intentional?
+								<?php if ($GLOBALS['settings']->get('request.one_charge_daily') == "1"):?>
+								<span class="d-block fst-italic fw-normal">Note: we charge a maximum of one rental fee per day (as determined by the largest event), regardless of whether you book multiple sessions.</span>
+								<?php endif; ?>
+								</p>
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+							<?php endif; ?>
 							<?php foreach ($_SESSION['form']['sessions'] as $key => $session): ?>
 							<?php $price = new Price($session['session_attendance']); ?>
 							<?php $booze = ($session['session_alcohol'] == "y") ? "Yes" : "No"; ?>
@@ -319,6 +329,14 @@ if (isset($_SESSION['alert']))
 					<div class="sticky-top ps-2">
 						<h3 class="text-heading text-primary-emphasis fw-light h4 mt-1 pt-4 pb-2 mb-3 border-bottom border-secondary-subtle">Rental summary</h3>
 						<?php
+						// Per setting, check if we should max rental charges per day
+						if ($GLOBALS['settings']->get('request.one_charge_daily') == "1"):
+						?>
+						<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+							<p class="my-0 fs-7 fst-italic fw-normal">Note: we charge a maximum of one rental fee per day (as determined by the largest event), regardless of whether you book multiple sessions.</p>
+						</div>
+						<?php endif; ?>
+						<?php
 						// Form initial state or no sessions in list
 						$total = "-";
 						if (isset($_SESSION['form']['sessions']) && !empty($_SESSION['form']['sessions'])):
@@ -327,9 +345,17 @@ if (isset($_SESSION['alert']))
 						// Note: request_get_fees returns the appropriate price IDs of the respective fees, not the amounts
 						$fees = Request::request_get_fees($_SESSION['form']['sessions'], $config['products']['cleaning'], $config['products']['security']);
 						if (!empty($fees)):
-						foreach ($_SESSION['form']['sessions'] as $session):
+						$sessions_waived = Event::event_return_sessions_discounted($_SESSION['form']['sessions']);
+						foreach ($_SESSION['form']['sessions'] as $key => &$session):
 						?>
 						<!-- Row per session -->
+						<?php
+						// Check for a discounted session
+						if (in_array($key, $sessions_waived))
+						{
+							$session['rental_waived'] = '1';
+						}
+						?>
 						<?php $price = new Price($session['session_attendance']); ?>
 						<div class="mb-2 pb-2 border-bottom border-secondary-subtle">
 							<div class="d-flex justify-content-between align-items-center">
@@ -342,7 +368,16 @@ if (isset($_SESSION['alert']))
 								<div class="left fw-medium fs-7">
 									<span class="text-secondary fs-7">Rental fee</span> <span class="fw-light">(<?php echo $price->price_get('field_request_label'); ?> people)</span>
 								</div>
-								<div class="right fw-light"><div id="form_display_cost_total2">$<?php echo round($price->price_get('amount')); ?></div></div>
+								<div class="right fw-light"><div id="form_display_cost_total2">
+								<?php
+								$display_price = '$' . round($price->price_get('amount'));
+								if (isset($session['rental_waived']) && $session['rental_waived'] == '1')
+								{
+									$display_price = '<s>' . $display_price . '</s>';
+								}
+								echo $display_price;
+								?>
+								</div></div>
 							</div>
 							<?php if ($session['session_alcohol'] == "y"): ?>
 							<div class="d-flex justify-content-between align-items-center">
@@ -354,7 +389,10 @@ if (isset($_SESSION['alert']))
 							<?php $total = $total + intval(Price::price_get_amount($config['products']['cleaning'])); ?>
 							<?php endif; ?>
 						</div>
-						<?php $total = $total + intval(round(Price::price_get_amount($session['session_attendance']))); ?>
+						<?php
+						// Set total based on whether this session fee is waived
+						$total = (isset($session['rental_waived']) && $session['rental_waived'] == '1') ? $total : $total + intval(round(Price::price_get_amount($session['session_attendance'])));
+						?>
 						<?php endforeach; ?>
 						<?php endif; ?>
 						<!-- End row per session -->

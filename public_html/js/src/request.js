@@ -9,7 +9,7 @@ $(document).ready(function()
  *  Request screen
  */
 // Edit modal
-$('.form_block_session_edit').on('click', function()
+$('.form_block_event_session_edit').on('click', function()
 {
 	const button_action = $(this).data("bs-action");
 	const item_to_edit = $(this).data("bs-itemtoedit");
