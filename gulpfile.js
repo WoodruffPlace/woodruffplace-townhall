@@ -59,6 +59,8 @@ var jsFiles =
     sourcePath + 'request.js',
     sourcePath + 'new.js',
     sourcePath + 'checklist.js',
+    sourcePath + 'request_list_filters.js',
+    sourcePath + 'request_list_search.js',
     sourcePath + 'app.js',
 ];
 

@@ -23,17 +23,63 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 		</div>
 	</div>
 	<div class="container-lg">
-		<div class="row justify-content-center mb-lg-5">
+		<div class="row justify-content-center">
 			<div class="col-12">
 				<div class="row pt-3 pt-md-2 mt-2 align-items-center">
 					<div class="col-12 col-md ps-lg-0">
 						<h1 class="text-heading text-primary fw-semibold mb-2 pb-2 mx-0">Requests</h1>
 					</div>
 				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="container-lg">
+		<div class="row">
+			<div class="col-12 col-md-5 ps-lg-0 d-flex align-items-center">
+				<label for="form_business_email" class="form-label visually-hidden">Search requests</label>
+				<input type="search" class="form-control" name="requests_search" id="requests_search" placeholder="Search request title, session name, or customer name" value="">
+			</div>
+			<div class="col-12 col-md-5 pe-lg-0 mt-3 mt-md-0 d-flex align-items-center justify-content-start">
+				<!-- Membership status -->
+				<div class="dropdown me-2">
+					<button class="btn btn-sm btn-outline-shadow d-flex align-items-center map_btn_filters_reset dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"><span class="px-2">Request status</span></button>
+					<ul class="dropdown-menu p-0 requests_filter_status">
+						<li class="px-2 py-2">
+							<?php
+							$statuses = Request::request_get_valid_statuses();
+							foreach ($statuses as $key => $status):
+							?>
+							<div class="form-check d-flex align-items-start mb-2">
+								<input class="request_filter_check form-check-input townhall-form-check townhall-form-check-sm me-2 pe-1" type="checkbox" id="filter_status_<?php echo $key; ?>" value="<?php echo $key; ?>">
+								<label class="form-check-label fs-7 text-secondary-emphasis" for="filter_status_<?php echo $key; ?>"><?php echo $status['status']; ?></label>
+							</div>
+							<?php endforeach; ?>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-12 col-lg-2 mt-2 mt-lg-0 d-flex align-items-center justify-content-lg-end">
+				<button class="btn btn-sm btn-outline-shadow d-flex align-items-center townhall_btn_filters_reset d-none">
+					<span class="bi bi-x-circle-fill text-danger fs-7 me-1 pe-1"></span>
+					<span class="label">Reset filters</span>
+				</button>
+			</div>
+		</div>
+		<div class="row my-2">
+			<div class="col-12 px-lg-0">
+				<p class="text-secondary fs-7 my-0"><span class="requests_count"><?php echo count($requests); ?></span> <span class="noun_plural">members</span> shown</p>
+			</div>
+		</div>
+	</div>
+	<div class="container-lg">
+		<div class="row justify-content-center mb-lg-5">
+			<div class="col-12">
 				<?php
 				if ($requests && count($requests) > 0):
 				?>
-				<div class="row align-items-center pt-3 pb-3 bg-primary text-white d-none d-lg-flex">
+				<div class="townhall_request_table_header row align-items-center pt-3 pb-3 bg-primary text-white d-none d-lg-flex">
 					<div class="col-4">
 						<p class="my-0 fw-bold">Request</p>
 					</div>
@@ -53,13 +99,13 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 				// Visuals
 				$status["class"] = "text-success";
 				?>
-				<div class="row align-items-lg-center py-3 py-lg-1 border-bottom bg-white shadow-sm">
+				<div class="townhall_request_row row align-items-lg-center py-3 py-lg-1 border-bottom bg-white shadow-sm" data-status="<?php echo $request->request_get('status'); ?>">
 					<div class="col-12 col-lg-4">
 						<?php require(TEMPLATES . '/includes/_request_status_indicator.php'); ?>
-						<h4 class="h5 fw-light fs-5 my-0 mt-2"><a href="/request?id=<?php echo $request->request_get('requestID'); ?>" class="link-primary"><?php echo $request->request_get('title'); ?></a></h4>
+						<h4 class="h5 fw-light fs-5 my-0 mt-2"><a href="/request?id=<?php echo $request->request_get('requestID'); ?>" class="link-primary townhall_request_row_request_name"><?php echo $request->request_get('title'); ?></a></h4>
 					</div>
 					<div class="col-12 col-lg-4 mt-3">
-						<p class="my-0 text-body-secondary"><?php echo $customer->customer_get("name_first") . " " . $customer->customer_get("name_last"); ?>
+						<p class="my-0 text-body-secondary townhall_request_row_contact"><?php echo $customer->customer_get("name_first") . " " . $customer->customer_get("name_last"); ?>
 						<?php if (!empty($customer->customer_get('organization'))): ?>
 						<span class="d-block fs-7"><?php echo $customer->customer_get('organization'); ?></span>
 						<?php endif; ?>
@@ -80,7 +126,7 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 										$event = new Event($session);
 										?>
 										<p class="my-0 pb-2">
-											<span class="text-body-emphasis"><?php echo $event->event_get('title'); ?></span>
+											<span class="text-body-emphasis townhall_request_row_session_name"><?php echo $event->event_get('title'); ?></span>
 											<?php if ($event->event_shares_start_end_date()): ?>
 												<span class="d-block text-secondary fs-7"><?php echo date('M j, Y', strtotime($event->event_get('event_start'))) . " " . date('g:i a', strtotime($event->event_get('event_start'))) . " &ndash; " . date('g:i a', strtotime($event->event_get('event_end'))); ?></span>
 											<?php else: ?>

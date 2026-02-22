@@ -19,6 +19,7 @@ class Request
 	private $fee_waiver_cleaning;
 	private $fee_waiver_security;
 	private $status;
+	public static $valid_statuses = Array('initiated', 'review', 'denied', 'approved', 'expired', 'scheduled', 'in_progress', 'ended_pending', 'ended_abandoned', 'ended_inspect', 'complete_deposit_refunded', 'complete_deposit_retained', 'cancelled');
 
 	// Constructor
 
@@ -30,6 +31,8 @@ class Request
 			$this->db = $db;
 		}
 		$this->requestID = $requestID;
+		//self::$valid_statuses = Array('initiated', 'review', 'denied', 'approved', 'expired', 'scheduled', 'in_progress', 'ended_pending', 'ended_abandoned', 'ended_inspect', 'complete_deposit_refunded', 'complete_deposit_retained', 'cancelled');
+
 		try
 		{
 			// Populate object values
@@ -321,73 +324,6 @@ class Request
 
 
 	/**
-	 *  Returns the status as a pretty-printed label
-	 */
-	function status_display()
-	{
-		$return = Array();
-		switch ($this->status)
-		{
-			case 'initiated':
-				$return['status'] = 'Initiated';
-				$return['color-text'] = 'text-primary';
-				$return['color-btn'] = 'btn-primary';
-			break;
-			case 'review':
-				$return['status'] = 'In review';
-				$return['color-text'] = 'text-info';
-				$return['color-btn'] = 'btn-primary';
-			break;
-			case 'denied':
-				$return['status'] = 'Denied';
-				$return['color-text'] = 'text-danger';
-				$return['color-btn'] = 'btn-danger';
-			break;
-			case 'approved':
-				$return['status'] = 'Approved';
-				$return['status_long'] = 'Approved';
-				$return['color-text'] = 'text-success';
-				$return['color-btn'] = 'btn-success';
-			break;
-			case 'scheduled':
-				$return['status'] = 'Scheduled';
-				$return['color-text'] = 'text-success text-opacity-75';
-				$return['color-pill'] = 'text-success';
-				$return['color-btn'] = 'btn-success';
-			break;
-			case 'in_progress':
-				$return['status'] = 'In progress';
-				$return['color-text'] = 'text-success';
-				$return['color-btn'] = 'btn-success';
-			break;
-			case 'ended_pending':
-				$return['status'] = 'Ended, inspection pending';
-				$return['color-text'] = 'text-warning';
-				$return['color-btn'] = 'btn-warning';
-			break;
-			case 'ended_abandoned':
-				$return['status'] = 'Ended. No checklist submitted.';
-				$return['color-text'] = 'text-primary text-opacity-50';
-				$return['color-btn'] = 'btn-secondary';
-			break;
-			case 'complete_deposit_refunded':
-				$return['status'] = 'Complete';
-				$return['color-text'] = 'text-primary text-opacity-50';
-				$return['color-btn'] = 'btn-secondary';
-			break;
-			case 'complete_deposit_retained':
-				$return['status'] = 'Complete (deposit retained)';
-				$return['color-text'] = 'text-primary text-opacity-50';
-				$return['color-btn'] = 'btn-secondary';
-			break;
-			default:
-				$return['status'] = ucfirst($this->status);
-				$return['color-text'] = 'text-primary text-opacity-50';
-		}
-		return $return;
-	}
-
-	/**
 	 *  Sets this object's info from the data store
 	 */
 	function setinfo()
@@ -415,6 +351,7 @@ class Request
 		}
 	}
 
+
 	/**
 	 *  Process the approval for an internal event
 	 */
@@ -428,6 +365,7 @@ class Request
 		$message = Messages::customer_internal_request_approval($this);
 		Utility::mailer_helper($mail, $requestor->customer_get('email'), "Town Hall request approved - " . $this->request_get('title'), $message, 'Woodruff Place Town Hall');
 	}
+
 
 	/**
 	 *  Process the DENIAL for an internal event
@@ -731,13 +669,95 @@ class Request
 		}
 	}
 
+
+	/**
+	 *  Returns the status as a pretty-printed label
+	 */
+	static function status_display($status)
+	{
+		$return = Array();
+		switch ($status)
+		{
+			case 'initiated':
+				$return['status'] = 'Initiated';
+				$return['color-text'] = 'text-primary';
+				$return['color-btn'] = 'btn-primary';
+			break;
+			case 'review':
+				$return['status'] = 'In review';
+				$return['color-text'] = 'text-info';
+				$return['color-btn'] = 'btn-primary';
+			break;
+			case 'denied':
+				$return['status'] = 'Denied';
+				$return['color-text'] = 'text-danger';
+				$return['color-btn'] = 'btn-danger';
+			break;
+			case 'approved':
+				$return['status'] = 'Approved';
+				$return['status_long'] = 'Approved';
+				$return['color-text'] = 'text-success';
+				$return['color-btn'] = 'btn-success';
+			break;
+			case 'scheduled':
+				$return['status'] = 'Scheduled';
+				$return['color-text'] = 'text-success text-opacity-75';
+				$return['color-pill'] = 'text-success';
+				$return['color-btn'] = 'btn-success';
+			break;
+			case 'in_progress':
+				$return['status'] = 'In progress';
+				$return['color-text'] = 'text-success';
+				$return['color-btn'] = 'btn-success';
+			break;
+			case 'ended_pending':
+				$return['status'] = 'Ended, inspection pending';
+				$return['color-text'] = 'text-warning';
+				$return['color-btn'] = 'btn-warning';
+			break;
+			case 'ended_abandoned':
+				$return['status'] = 'Ended. No checklist submitted.';
+				$return['color-text'] = 'text-primary text-opacity-50';
+				$return['color-btn'] = 'btn-secondary';
+			break;
+			case 'complete_deposit_refunded':
+				$return['status'] = 'Complete';
+				$return['color-text'] = 'text-primary text-opacity-50';
+				$return['color-btn'] = 'btn-secondary';
+			break;
+			case 'complete_deposit_retained':
+				$return['status'] = 'Complete (deposit retained)';
+				$return['color-text'] = 'text-primary text-opacity-50';
+				$return['color-btn'] = 'btn-secondary';
+			break;
+			default:
+				$return['status'] = ucfirst($status);
+				$return['color-text'] = 'text-primary text-opacity-50';
+		}
+		return $return;
+	}
+
+	/**
+	 *  Return an array of all valid statuses
+	 */
+	static function request_get_valid_statuses()
+	{
+		$return = Array();
+		foreach (self::$valid_statuses as $status)
+		{
+			$temp = Array();
+			$temp = self::status_display($status);
+			$return[$status] = $temp;
+		}
+		return $return;
+	}
+
+
 	/**
 	 *  Holds the valid values for request status
 	 */
 	static function status_is_valid($status)
 	{
-		$statuses = Array('initiated', 'review', 'denied', 'approved', 'expired', 'scheduled', 'in_progress', 'ended_pending', 'ended_abandoned', 'ended_inspect', 'complete_deposit_refunded', 'complete_deposit_retained', 'cancelled');
-		return (in_array($status, $statuses)) ? true : false;
-
+		return (in_array($status, self::$valid_statuses)) ? true : false;
 	}
 }

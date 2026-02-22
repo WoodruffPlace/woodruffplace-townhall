@@ -371,18 +371,22 @@ if (isset($_SESSION['alert']))
 							<div class="mt-2 d-lg-none">
 								<?php require(TEMPLATES . '/includes/_request_status_indicator_label.php'); ?>
 							</div>
-							<div class="d-flex justify-content-between align-items-center my-2 py-3">
+							<div class="d-flex justify-content-between align-items-center my-2 pt-3 pb-1">
 								<?php if ($mode_edit == "true"): ?>
 								<h1 class="text-heading text-primary fw-semibold my-0">Editing request</h1>
 								<?php else: ?>
 								<h1 class="text-heading text-primary fw-semibold my-0"><?php echo $request->request_get('title'); ?></h1>
 								<?php endif; ?>
-								<?php if ($mode_edit != "true" && $request->is_editable()): ?>
-								<a href="/request?id=<?php echo $request->request_get('requestID'); ?>&edit=true" class="btn btn-outline-secondary btn-sm"><span class="bi bi-pencil me-2"></span> Edit <span class="d-none d-md-inline">information</span></a>
-								<?php endif; ?>
 							</div>
 						</div>
 					</div>
+					<?php if ($mode_edit != "true" && $request->is_editable()): ?>
+					<div class="row mb-2">
+						<div class="col-12 justify-content-md-end d-flex">
+							<a href="/request?id=<?php echo $request->request_get('requestID'); ?>&edit=true" class="btn btn-outline-secondary btn-sm"><span class="bi bi-pencil me-2"></span> Edit <span class="d-none d-md-inline">information</span></a>
+						</div>
+					</div>
+					<?php endif; ?>
 					<?php if ($mode_edit == "true" && !$request->is_prepayment()): ?>
 					<div class="alert alert-warning" role="alert">
 						Note: editing a request once payment is pending may not change the information on the invoice.
@@ -823,7 +827,7 @@ if (isset($_SESSION['alert']))
 												<p class="my-0 mb-3 fw-medium fs-7 fst-italic text-primary d-none alert_transition" id="alert_transition_approved">Marking a request as "approved" will send an invoice to the customer. Line items and fees are no longer editable.</p>
 												<!-- Denied -->
 												<p class="my-0 mb-3 fw-medium fs-7 fst-italic text-danger d-none alert_transition" id="alert_transition_denied">Marking a request as "denied" at any point is a terminal state; customer will need to re-submit request.</p>
-												<button type="submit" name="action" value="request_route" id="request_status_transition" class="btn <?php echo $request->status_display()['color-btn']; ?> btn-lg px-4 flex-fill px-md-5 fs-6">Save request</button>
+												<button type="submit" name="action" value="request_route" id="request_status_transition" class="btn <?php echo Request::status_display($request->request_get('status'))['color-btn']; ?> btn-lg px-4 flex-fill px-md-5 fs-6">Save request</button>
 											</div>
 										</div>
 									</div>

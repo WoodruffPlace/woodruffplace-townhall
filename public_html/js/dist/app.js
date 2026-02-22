@@ -468,6 +468,253 @@ function validate()
 	});
 }
 
+/**
+ *  Run a function each time a filter checkbox is clicked
+ *
+ */
+$(document).ready(function()
+{
+	$('.request_filter_check').on('click', function()
+	{
+		townhall_list_filter();
+	});
+	// Click the "reset filters" button
+	$('.townhall_btn_filters_reset').on('click', function()
+	{
+		townhall_list_reset();
+	});
+
+});
+
+/**
+ *  Filter the member list
+ *
+ *  @ active => array containing all items that should be shown
+ *  if null, show all markers
+ */
+function townhall_list_filter(clearAll = false)
+{
+	// Instantiate filter array
+	let checkedItems = [];
+
+	// Loop through all checkboxes and populate filter array
+	$(".request_filter_check").each(function(index, element)
+	{
+		if ($(element).is(':checked'))
+		{
+			checkedItems.push($(element).attr("value"));
+		}
+	});
+	// Show the "reset all filters" button
+	$('.townhall_btn_filters_reset').removeClass('d-none');
+
+	// If array is empty, show all markers
+	if (checkedItems.length === 0 || clearAll == true)
+	{
+		// Remove all filters and hide classes
+		$('.townhall_request_row').removeClass('d-none');
+		$('.townhall_request_row').removeClass('filter-show');
+		$('.townhall_request_row').removeClass('filter-hide');
+
+		// Uncheck the checkboxes
+		$('.request_filter_check').prop('checked', false);
+
+		// Hide the "reset all filters" button
+		$('.townhall_btn_filters_reset').addClass('d-none');
+
+		// If there's a term in the search field, run it back through
+		// ONLY if clearAll flag is not set
+		if (!clearAll && $('#requests_search').val())
+		{
+			townhall_member_search($('#requests_search').val());
+		}
+	}
+	// If not empty, hide all markers that are not in the array
+	else
+	{
+		// Hide all first
+		$('.townhall_request_row').addClass('d-none');
+		$('.townhall_request_row').addClass('filter-hide');
+		$('.townhall_request_row').removeClass('filter-show');
+
+		// Show the remaining rows
+		let counter = 0;
+		checkedItems.forEach(function(status)
+		{
+			$('.townhall_request_row[data-status="' + status +'"]').removeClass('d-none');
+			$('.townhall_request_row[data-status="' + status +'"]').addClass('filter-show');
+			$('.townhall_request_row[data-status="' + status +'"]').removeClass('filter-hide');
+			counter++;
+		});
+
+		if (counter > 0)
+		{
+			// Hide the "search results empty" notification
+			$('.search-results-empty').addClass('d-none');
+		}
+
+		// If there's a term in the search field, run it back through
+		if ($('#requests_search').val())
+		{
+			townhall_member_search($('#requests_search').val());
+		}
+	}
+	// Update the count
+	townhall_update_visible_count();
+}
+
+/**
+ *  Show the element during the filter/search
+ */
+function townhall_element_show(element)
+{
+	element.classList.remove('d-none');
+	element.classList.remove('filter-hide');
+	element.classList.add('filter-show');
+}
+
+/**
+ *  Hide the element during the filter/search
+ */
+function townhall_element_hide(element)
+{
+	element.classList.add('d-none');
+	element.classList.add('filter-hide');
+	element.classList.remove('filter-show');
+}
+
+
+/**
+ *  Sum the visible rows and adjust the count
+ */
+function townhall_update_visible_count()
+{
+	let count = $('.townhall_request_row:not(.d-none)').length;
+	$('.requests_count').text(count);
+	// Set the proper singular/plural
+	let term = (count == 1) ? "request" : "requests";
+	$('.noun_plural').text(term);
+}
+
+
+/**
+ *  Reset all filters and search
+ */
+function townhall_list_reset()
+{
+	townhall_list_filter(true);
+	// Clear the search field
+	$('#requests_search').val('');
+	// Hide the "search results empty" notification
+	$('.search-results-empty').addClass('d-none');
+	// Update the count
+	townhall_update_visible_count();
+}
+
+/**
+ *  Run a function each time a filter checkbox is clicked
+ *
+ */
+$(document).ready(function()
+{
+	const searchInput = document.getElementById('requests_search');
+	// Event listener for the 'input' event
+	if (searchInput)
+	{
+		searchInput.addEventListener('input', (event) =>
+		{
+			// Check if the current value of the input is an empty string
+			if (event.currentTarget.value === "")
+			{
+				townhall_request_search_clear();
+			}
+			else
+			{
+				townhall_request_search(event.currentTarget.value);
+				townhall_request_search_check_no_results();
+			}
+		});
+	}
+});
+
+/**
+ *  Search
+ *
+ *  @ term => string representing the current search term
+ */
+function townhall_request_search(term)
+{
+	let containers = document.querySelectorAll('.townhall_request_row');
+	let searchTerm = term.toLowerCase();
+	// show the "reset filters" button
+	$('.townhall_btn_filters_reset').removeClass('d-none');
+
+	containers.forEach(e =>
+	{
+		//if (e.textContent.toLowerCase().includes(searchTerm))
+		if (
+			!e.classList.contains('filter-hide') &&
+			(
+			e.querySelector('.townhall_request_row_request_name').textContent.toLowerCase().includes(searchTerm) ||
+			e.querySelector('.townhall_request_row_contact').textContent.toLowerCase().includes(searchTerm) ||
+			e.querySelector('.townhall_request_row_session_name').textContent.toLowerCase().includes(searchTerm)
+			))
+		{
+			// Ensure previously hidden items are shown
+			e.closest('.townhall_request_row').classList.remove('d-none');
+		}
+		else
+		{
+			// Hide the list item
+			e.closest('.townhall_request_row').classList.add('d-none');
+		}
+	});
+	// Update the count
+	townhall_update_visible_count();
+}
+
+/**
+ *  Clear the search results
+ */
+function townhall_request_search_clear(leaveFilters = true)
+{
+	if (leaveFilters == true)
+	{
+		$('.townhall_request_row:not(.filter-hide)').removeClass('d-none');
+		// Show the "reset all filters" button
+		$('.townhall_btn_filters_reset').removeClass('d-none');
+	}
+	else
+	{
+		$('.townhall_request_row').removeClass('d-none');
+		// Hide the "reset all filters" button
+		$('.townhall_btn_filters_reset').addClass('d-none');
+	}
+	// Hide the "search results empty" notification
+	$('.search-results-empty').addClass('d-none');
+	// Update the count
+	townhall_update_visible_count();
+}
+
+/**
+ *  Show the "no results" content if applicable
+ */
+function townhall_request_search_check_no_results()
+{
+	if ($(".townhall_request_row").length === $(".townhall_request_row.d-none").length)
+	{
+		// No results found
+		$('.search-results-empty').removeClass('d-none');
+		$('.townhall_request_table_header').addClass('d-none');
+	}
+	else
+	{
+		// Results found
+		$('.search-results-empty').addClass('d-none');
+		$('.townhall_request_table_header').removeClass('d-none');
+	}
+}
+
 
 // Document ready functions
 $( document ).ready(function()

@@ -1,0 +1,17 @@
+.btn
+{
+	&.btn-outline-shadow
+	{
+		background-color: $white;
+		border: solid 1px $gray-500;
+		&:hover
+		{
+			box-shadow: 0 0 10px rgba(0,0,0,0.25);
+		}
+		&:active, &:focus
+		{
+			background-color: $white !important;
+			border-color: $gray-800;
+		}
+	}
+}
