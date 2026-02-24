@@ -449,7 +449,7 @@ class Request
 			// Gather data
 			$event = new Event($session);
 			$fee_rental = new Price($event->event_get('fee_rental'));
-			$fee_alcohol = new Price($event->event_get('fee_alcohol'));
+			$fee_alcohol = (!empty($event->event_get('fee_alcohol'))) ? new Price($event->event_get('fee_alcohol')) : null;
 
 			// Set whether the rental fee is waived
 			$fee_rental_discount = ($event->fee_waived('rental') == TRUE) ? $GLOBALS['settings']->get('invoice.discount.100') : false;
@@ -457,9 +457,12 @@ class Request
 			array_push($invoice_items, Array('price' => $fee_rental->price_get('stripe_price_id'), 'discount' => $fee_rental_discount, 'description' => $event->event_get('title') . ' - ' . $fee_rental->price_get('description_invoice')));
 
 			// Set whether the alcohol fee is waived
-			$fee_alcohol_discount = ($event->fee_waived('alcohol') == TRUE) ? $GLOBALS['settings']->get('invoice.discount.100') : false;
-			// Push to the array
-			array_push($invoice_items, Array('price' => $fee_alcohol->price_get('stripe_price_id'), 'discount' => $fee_alcohol_discount, 'description' => $event->event_get('title') . ' - ' . $fee_alcohol->price_get('description_invoice')));
+			if ($fee_alcohol != null)
+			{
+				$fee_alcohol_discount = ($event->fee_waived('alcohol') == TRUE) ? $GLOBALS['settings']->get('invoice.discount.100') : false;
+				// Push to the array
+				array_push($invoice_items, Array('price' => $fee_alcohol->price_get('stripe_price_id'), 'discount' => $fee_alcohol_discount, 'description' => $event->event_get('title') . ' - ' . $fee_alcohol->price_get('description_invoice')));
+			}
 		}
 
 		// Loop through the $prices array and add the items
@@ -471,7 +474,6 @@ class Request
 				$valid = false;
 			}
 		}
-
 		return $valid;
 	}
 
@@ -511,8 +513,6 @@ class Request
 	}
 
 
-
-
 	/* * * * * * * * * * * * * * *
 	 *
 	 *  Class/static methods
@@ -525,7 +525,10 @@ class Request
 	public static function request_get_requests($all = FALSE)
 	{
 		global $db;
-		$query = "SELECT * FROM requests LEFT JOIN event_sessions on requests.requestID = event_sessions.requestID ORDER BY event_start DESC";
+		$query = "SELECT DISTINCT requestID FROM event_sessions";
+
+		//$query = "SELECT * FROM requests";
+
 		//$query = ($all == TRUE) ? "SELECT * FROM requests" : "SELECT requestID FROM requests";
 		$result = $db->fetch_assoc($db->query($query));
 		if (!empty($result))
