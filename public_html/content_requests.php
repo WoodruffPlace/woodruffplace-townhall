@@ -33,8 +33,6 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 			</div>
 		</div>
 	</div>
-
-
 	<div class="container-lg">
 		<div class="row">
 			<div class="col-12 col-md-5 ps-lg-0 d-flex align-items-center">

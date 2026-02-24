@@ -106,6 +106,7 @@ class FormProcessor
 				// Update - Woodruff events are fee-waived
 				if ($request->request_get('is_wp_event') == "1")
 				{
+					echo "yessss";
 					Event::event_update_session('fee_waiver_rental', "1", $eventID);
 					Event::event_update_session('fee_waiver_alcohol', "1", $eventID);
 				}
@@ -197,7 +198,7 @@ class FormProcessor
 		$fee_security = new Price($fees['security']);
 
 		// Create the request, grab the Request ID
-		$requestID = Request::request_create($form['event_title'], $customerID, Utility::process_yn_boolean($form['wpcl_member']), $form['wpcl_sponsor_name_first'], $form['wpcl_sponsor_name_last'], $form['wpcl_sponsor_email'], $form['wpcl_sponsor_phone'], $form['is_wp_event'], $fee_security->price_get('priceID'), $fee_cleaning->price_get('priceID'));
+		$requestID = Request::request_create($form['event_title'], $customerID, Utility::process_yn_boolean($form['wpcl_member']), $form['wpcl_sponsor_name_first'], $form['wpcl_sponsor_name_last'], $form['wpcl_sponsor_email'], $form['wpcl_sponsor_phone'], Utility::process_yn_boolean($form['is_wp_event']), $fee_security->price_get('priceID'), $fee_cleaning->price_get('priceID'));
 
 		// Set return = false if something went wrong
 		if (!$requestID)

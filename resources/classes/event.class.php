@@ -367,38 +367,41 @@ class Event
 	 */
 	public static function events_are_overlapping($sessions)
 	{
-		// Iterate and create an array of dates
-		$ranges = Array();
-		foreach ($sessions as $key => $session)
+		if (count($sessions) > 1)
 		{
-			$temp = Array();
-			$temp['key'] = $key;
-			$temp['start'] = date('Y-m-d', strtotime($session['session_start_date'])) . ' ' . date('g:i a', strtotime($session['session_start_time']));
-			$temp['end'] = date('Y-m-d', strtotime($session['session_end_date'])) . ' ' . date('g:i a', strtotime($session['session_end_time']));
-			array_push($ranges, $temp);
-			unset($temp);
-		}
-
-		// 1. Sort the ranges by their start times
-		usort($ranges, function ($a, $b)
-		{
-			// Convert string dates to timestamps for reliable comparison
-			return strtotime($a['start']) <=> strtotime($b['start']);
-		});
-
-		// 2. Iterate through the sorted ranges, comparing each with the next one
-		$count = count($ranges);
-		for ($i = 0; $i < $count - 1; $i++)
-		{
-			$current = $ranges[$i];
-			$next = $ranges[$i + 1];
-
-			// 3. Check for overlap between current and next range
-			// An overlap occurs if the current range's end time is after the next range's start time
-			if (strtotime($current['end']) > strtotime($next['start']))
+			// Iterate and create an array of dates
+			$ranges = Array();
+			foreach ($sessions as $key => $session)
 			{
-				// Overlap found
-				return true;
+				$temp = Array();
+				$temp['key'] = $key;
+				$temp['start'] = date('Y-m-d', strtotime($session['session_start_date'])) . ' ' . date('g:i a', strtotime($session['session_start_time']));
+				$temp['end'] = date('Y-m-d', strtotime($session['session_end_date'])) . ' ' . date('g:i a', strtotime($session['session_end_time']));
+				array_push($ranges, $temp);
+				unset($temp);
+			}
+
+			// 1. Sort the ranges by their start times
+			usort($ranges, function ($a, $b)
+			{
+				// Convert string dates to timestamps for reliable comparison
+				return strtotime($a['start']) <=> strtotime($b['start']);
+			});
+
+			// 2. Iterate through the sorted ranges, comparing each with the next one
+			$count = count($ranges);
+			for ($i = 0; $i < $count - 1; $i++)
+			{
+				$current = $ranges[$i];
+				$next = $ranges[$i + 1];
+
+				// 3. Check for overlap between current and next range
+				// An overlap occurs if the current range's end time is after the next range's start time
+				if (strtotime($current['end']) > strtotime($next['start']))
+				{
+					// Overlap found
+					return true;
+				}
 			}
 		}
 		// No overlaps found in the entire list

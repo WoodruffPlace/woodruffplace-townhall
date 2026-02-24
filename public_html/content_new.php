@@ -264,6 +264,7 @@ if (isset($_SESSION['alert']))
 					<!-- Sessions list -->
 					<div class="row my-4">
 						<div class="col-12">
+							<?php Event::events_are_overlapping($_SESSION['form']['sessions']); ?>
 							<?php if (Event::events_are_overlapping($_SESSION['form']['sessions'])): ?>
 							<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
 								<p class="my-0 fs-7 fw-bold">You have overlapping events. Is this intentional?
@@ -329,14 +330,6 @@ if (isset($_SESSION['alert']))
 					<div class="sticky-top ps-2">
 						<h3 class="text-heading text-primary-emphasis fw-light h4 mt-1 pt-4 pb-2 mb-3 border-bottom border-secondary-subtle">Rental summary</h3>
 						<?php
-						// Per setting, check if we should max rental charges per day
-						if ($GLOBALS['settings']->get('request.one_charge_daily') == "1"):
-						?>
-						<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-							<p class="my-0 fs-7 fst-italic fw-normal">Note: we charge a maximum of one rental fee per day (as determined by the largest event), regardless of whether you book multiple sessions.</p>
-						</div>
-						<?php endif; ?>
-						<?php
 						// Form initial state or no sessions in list
 						$total = "-";
 						if (isset($_SESSION['form']['sessions']) && !empty($_SESSION['form']['sessions'])):
@@ -346,6 +339,14 @@ if (isset($_SESSION['alert']))
 						$fees = Request::request_get_fees($_SESSION['form']['sessions'], $config['products']['cleaning'], $config['products']['security']);
 						if (!empty($fees)):
 						$sessions_waived = Event::event_return_sessions_discounted($_SESSION['form']['sessions']);
+						// Per setting, check if we should max rental charges per day
+						if ($GLOBALS['settings']->get('request.one_charge_daily') == "1" && (!empty($sessions_waived) && count($sessions_waived) >= 1)):
+						?>
+						<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+							<p class="my-0 fs-7 fst-italic fw-normal">Note: we charge a maximum of one rental fee per day (as determined by the largest event), regardless of whether you book multiple sessions.</p>
+						</div>
+						<?php endif; ?>
+						<?php
 						foreach ($_SESSION['form']['sessions'] as $key => &$session):
 						?>
 						<!-- Row per session -->

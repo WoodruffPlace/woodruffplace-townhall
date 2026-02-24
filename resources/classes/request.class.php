@@ -525,7 +525,8 @@ class Request
 	public static function request_get_requests($all = FALSE)
 	{
 		global $db;
-		$query = ($all == TRUE) ? "SELECT * FROM requests" : "SELECT requestID FROM requests";
+		$query = "SELECT * FROM requests LEFT JOIN event_sessions on requests.requestID = event_sessions.requestID ORDER BY event_start DESC";
+		//$query = ($all == TRUE) ? "SELECT * FROM requests" : "SELECT requestID FROM requests";
 		$result = $db->fetch_assoc($db->query($query));
 		if (!empty($result))
 		{

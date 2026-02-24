@@ -84,7 +84,22 @@ class Messages
 		global $config;
 		$requestor = new Customer($request->request_get('customer'));
 		$message = $requestor->customer_get('name_first') . ",\n\nYour request to use Woodruff Place Town Hall for the following event has been approved:\n\n";
-		$message .= $request->request_get('title');
+		$message .= $request->request_get('title') . "\n";
+		foreach ($request->request_get_sessions() as $session)
+		{
+			$event = new Event($session);
+			$message .= (!empty($event->event_get('title'))) ? "\n" . $event->event_get('title') . "\n" : '';
+			if ($event->event_shares_start_end_date())
+			{
+				$message .= date('M j, Y', strtotime($event->event_get('event_start'))) . ": " . date('g:i a', strtotime($event->event_get('event_start'))) . " - " . date('g:i a', strtotime($event->event_get('event_end')));
+			}
+			else
+			{
+				$message .= "Start: " . date('M j, Y g:i a', strtotime($event->event_get('event_start'))) . "\n";
+				$message .= "End: " . date('M j, Y g:i a', strtotime($event->event_get('event_end')));
+			}
+			$message .= "\n";
+		}
 		$message .= "\n\nPlease do not hesitate to reach out to the Town Hall committee with any questions or for any assistance you may require." . $GLOBALS['config']['mail']['signature'];
 		return $message;
 	}

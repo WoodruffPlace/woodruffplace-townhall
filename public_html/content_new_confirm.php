@@ -1,7 +1,7 @@
 <?php require_once('_session.php'); ?>
 <?php
-unset($_SESSION['form']);
-session_destroy();
+// unset($_SESSION['form']);
+// session_destroy();
 ?>
 <?php if (!isset($page_header)){ Page::redirect_home(); } ?>
 <div class="container-lg">
