@@ -304,35 +304,40 @@ class Event
 	}
 
 
-	public static function should_be_discounted($date, $this_session, $sessions)
-	{
-		$price_highest = 0;
-		$this_price = new Price($this_session['session_attendance']);
-		$date_match = false;
-		foreach ($sessions as $key => $session)
-		{
-			$price = new Price($session['session_attendance']);
-			if ($session['session_start_date'] == $date && $date == $this_session['session_start_date'])
-			{
-				$date_match = true;
-			}
-			if ($price->price_get('amount') > $price_highest)
-			{
-				$price_highest = $price->price_get('amount');
-			}
-			// else if ($price->price_get('amount') == $price_highest && )
-			// {
-			// 	return false;
-			// }
-		}
-		//echo $this_price->price_get('amount');
-		//echo $price_highest;
-		return ($date_match && $this_price->price_get('amount') <= $price_highest) ? true : false;
-	}
+	// public static function should_be_discounted($date, $this_session, $sessions)
+	// {
+	// 	$price_highest = 0;
+	// 	$this_price = new Price($this_session['session_attendance']);
+	// 	$date_match = false;
+	// 	foreach ($sessions as $key => $session)
+	// 	{
+	// 		$price = new Price($session['session_attendance']);
+	// 		if ($session['session_start_date'] == $date && $date == $this_session['session_start_date'])
+	// 		{
+	// 			$date_match = true;
+	// 		}
+	// 		if ($price->price_get('amount') > $price_highest)
+	// 		{
+	// 			$price_highest = $price->price_get('amount');
+	// 		}
+	// 		// else if ($price->price_get('amount') == $price_highest && )
+	// 		// {
+	// 		// 	return false;
+	// 		// }
+	// 	}
+	// 	//echo $this_price->price_get('amount');
+	// 	//echo $price_highest;
+	// 	return ($date_match && $this_price->price_get('amount') <= $price_highest) ? true : false;
+	// }
 
 
-
-	public static function event_return_sessions_discounted($sessions)
+	/**
+	 *  Accept events as inputs and return an array of session IDs
+	 *  that should be discounted. Note, this function is for
+	 *  use during the "new" process only. See sibling function
+	 *  in the Request class for use in already-saved events.
+	 */
+	public static function event_return_sessions_discounted_new($sessions)
 	{
 		$waived = Array();
 		foreach ($sessions as $key => $session)

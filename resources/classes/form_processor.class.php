@@ -106,7 +106,6 @@ class FormProcessor
 				// Update - Woodruff events are fee-waived
 				if ($request->request_get('is_wp_event') == "1")
 				{
-					echo "yessss";
 					Event::event_update_session('fee_waiver_rental', "1", $eventID);
 					Event::event_update_session('fee_waiver_alcohol', "1", $eventID);
 				}
@@ -151,7 +150,6 @@ class FormProcessor
 	 */
 	public static function new_request_initiate($form)
 	{
-		global $config;
 		global $mail;
 		$return = TRUE;
 		/**
@@ -193,7 +191,7 @@ class FormProcessor
 		 *  We have all we need to create the new request
 		 */
 		// First, get the fees
-		$fees = Request::request_get_fees($form['sessions'], $config['products']['cleaning'], $config['products']['security']);
+		$fees = Request::request_get_fees($form['sessions']);
 		$fee_cleaning = new Price($fees['cleaning']);
 		$fee_security = new Price($fees['security']);
 
@@ -260,7 +258,7 @@ class FormProcessor
 
 			// Notification to Town Hall committee
 			$message = Messages::committee_notification_new_request($form);
-			Utility::mailer_helper($mail, $config['notification_internal_requests'], "New Town Hall request - " . $form['event_title'], $message, 'Woodruff Place Town Hall');
+			Utility::mailer_helper($mail, $GLOBALS['config']['notification_internal_requests'], "New Town Hall request - " . $form['event_title'], $message, 'Woodruff Place Town Hall');
 		}
 		// Return
 		return $return;

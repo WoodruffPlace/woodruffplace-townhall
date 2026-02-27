@@ -285,6 +285,7 @@ class Request
 			case 'in_progress':
 			case 'expired':
 			case 'ended_pending':
+			case 'ended_inspect':
 				$return = true;
 		}
 		return $return;
@@ -436,7 +437,10 @@ class Request
 		$fee_security_deposit_discount = ($this->fee_waived('security') == TRUE) ? $GLOBALS['settings']->get('invoice.discount.100') : false;
 
 		// Push to the array
-		array_push($invoice_items, Array('price' => $fee_security_deposit->price_get('stripe_price_id'), 'discount' => $fee_security_deposit_discount, 'description' => $fee_security_deposit->price_get('description_invoice')));
+		if (!empty($fee_security_deposit->price_get('stripe_price_id')))
+		{
+			array_push($invoice_items, Array('price' => $fee_security_deposit->price_get('stripe_price_id'), 'discount' => $fee_security_deposit_discount, 'description' => $fee_security_deposit->price_get('description_invoice')));
+		}
 
 		/**
 		 *  Event sessions
@@ -512,6 +516,140 @@ class Request
 
 	}
 
+	/**
+	 *  Accept events as inputs and return an array of session IDs
+	 *  that should be discounted. Note, this function is for
+	 *  use on saved requests only. For the "new" process, see
+	 *  sibling function for use in already-saved events.
+	 */
+	function request_return_sessions_discounted($sessions)
+	{
+		$waived = Array();
+		foreach ($sessions as $session)
+		{
+			$event_outer = new Event($session);
+			foreach ($sessions as $subsession)
+			{
+				$event_inner = new Event($subsession);
+				if ($event_outer->event_get('eventID') == $event_inner->event_get('eventID'))
+				{
+					continue;
+				}
+				else if (date('Y-m-d', strtotime($event_outer->event_get('event_start'))) ==  date('Y-m-d', strtotime($event_inner->event_get('event_start'))))
+				{
+					$event_outer_price = new Price($event_outer->event_get('fee_rental'));
+					$event_inner_price = new Price($event_inner->event_get('fee_rental'));
+					if ($event_outer_price->price_get('amount') <= $event_inner_price->price_get('amount') &&
+					!(in_array($event_inner->event_get('eventID'), $waived))
+					)
+					{
+						array_push($waived, $event_outer->event_get('eventID'));
+					}
+				}
+			}
+		}
+		return $waived;
+	}
+
+
+	/**
+	 *  Returns an array of conflict
+	 */
+	public static function get_conflict_map()
+	{
+		global $db;
+		$status_filter = "(requests.status = 'approved' OR requests.status = 'scheduled' OR requests.status = 'in_progress' OR requests.status = 'initiated' OR requests.status = 'review')";
+
+		$query =
+		"SELECT event_sessions.eventID, event_sessions.event_start, event_sessions.event_end, event_sessions.requestID, requests.status
+		FROM event_sessions LEFT JOIN requests on event_sessions.requestID = requests.requestID
+		WHERE
+		event_sessions.event_start > NOW() AND " . $status_filter;
+		$result = $db->fetch_assoc($db->query($query));
+
+		$conflictMap = [];
+
+		foreach ($result as $event1)
+		{
+			$id1 = $event1['eventID'];
+			$start1 = strtotime($event1['event_start']);
+			$end1 = strtotime($event1['event_end']);
+
+			foreach ($result as $event2)
+			{
+				$id2 = $event2['eventID'];
+
+				// Skip comparing the event against itself
+				if ($id1 === $id2) continue;
+
+				$start2 = strtotime($event2['event_start']);
+				$end2 = strtotime($event2['event_end']);
+
+				// Logic: Overlap exists if (StartA < EndB) AND (EndA > StartB)
+				if ($start1 < $end2 && $end1 > $start2)
+				{
+					// Initialize the array for this ID if it doesn't exist yet
+					if (!isset($conflictMap[$id1]))
+					{
+						$conflictMap[$id1] = [];
+					}
+					$conflictMap[$id1][] = $id2;
+				}
+			}
+		}
+		return $conflictMap;
+	}
+
+
+
+	/**
+	 *  Accept events as inputs and return whether there are overlapping
+	 *  Accepts an associative array of start/end date pairs
+	 */
+	public static function events_are_overlapping($sessions)
+	{
+		if (count($sessions) > 1)
+		{
+			// Iterate and create an array of dates
+			$ranges = Array();
+			foreach ($sessions as $key => $session)
+			{
+				$temp = Array();
+				$temp['key'] = $key;
+				$temp['start'] = date('Y-m-d', strtotime($session['session_start_date'])) . ' ' . date('g:i a', strtotime($session['session_start_time']));
+				$temp['end'] = date('Y-m-d', strtotime($session['session_end_date'])) . ' ' . date('g:i a', strtotime($session['session_end_time']));
+				array_push($ranges, $temp);
+				unset($temp);
+			}
+
+			// 1. Sort the ranges by their start times
+			usort($ranges, function ($a, $b)
+			{
+				// Convert string dates to timestamps for reliable comparison
+				return strtotime($a['start']) <=> strtotime($b['start']);
+			});
+
+			// 2. Iterate through the sorted ranges, comparing each with the next one
+			$count = count($ranges);
+			for ($i = 0; $i < $count - 1; $i++)
+			{
+				$current = $ranges[$i];
+				$next = $ranges[$i + 1];
+
+				// 3. Check for overlap between current and next range
+				// An overlap occurs if the current range's end time is after the next range's start time
+				if (strtotime($current['end']) > strtotime($next['start']))
+				{
+					// Overlap found
+					return true;
+				}
+			}
+		}
+		// No overlaps found in the entire list
+		return false;
+	}
+
+
 
 	/* * * * * * * * * * * * * * *
 	 *
@@ -571,7 +709,7 @@ class Request
 	}
 
 	/**
-	 *  Updates columns in the db for this user
+	 *  Updates columns in the db for this request
 	 */
 	function request_update($column, $value)
 	{
@@ -581,6 +719,24 @@ class Request
 		// Reset the object
 		$this->setinfo();
 		return $result;
+	}
+
+	/**
+	 *  Updates columns in the db for this user
+	 */
+	function request_update_fees()
+	{
+		// 1. Get sessions
+		$sessions = $this->request_get_sessions();
+
+		// 2. Get fees
+		$fees = self::request_get_fees($sessions);
+
+		// 3. Update cleaning fee
+		$this->request_update('cleaning_fee', $fees['cleaning']);
+
+		// 4. Update security deposit
+		$this->request_update('security_deposit', $fees['security']);
 	}
 
 	/**
@@ -594,13 +750,13 @@ class Request
 	 *    + events 31-60
 	 *
 	 */
-	public static function request_get_fees($request_sessions, $productID_cleaning, $productID_security)
+	public static function request_get_fees($request_sessions)
 	{
 		// Cleaning fee product ID: 4
-		$product_cleaning_fee = new Product($productID_cleaning);
+		$product_cleaning_fee = new Product($GLOBALS['config']['products']['cleaning']);
 
 		// Security deposit product ID: 3
-		$product_security_deposit = new Product($productID_security);
+		$product_security_deposit = new Product($GLOBALS['config']['products']['security']);
 
 		// Instantiate return array
 		$return_price = Array();
@@ -715,7 +871,12 @@ class Request
 				$return['color-btn'] = 'btn-success';
 			break;
 			case 'ended_pending':
-				$return['status'] = 'Ended, inspection pending';
+				$return['status'] = 'Ended. Awaiting checklist.';
+				$return['color-text'] = 'text-warning';
+				$return['color-btn'] = 'btn-warning';
+			break;
+			case 'ended_inspect':
+				$return['status'] = 'Ended. Inspection pending';
 				$return['color-text'] = 'text-warning';
 				$return['color-btn'] = 'btn-warning';
 			break;

@@ -8,6 +8,9 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 {
 	$roles['admin'] = TRUE;
 	$requests = Request::request_get_requests();
+
+	// Get any session conflicts
+	$conflicts = Request::get_conflict_map();
 }
 ?>
 <main class="bg-body-tertiary">
@@ -123,7 +126,7 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 										foreach ($sessions as $session):
 										$event = new Event($session);
 										?>
-										<p class="my-0 pb-2">
+										<p class="my-0 py-1">
 											<span class="text-body-emphasis townhall_request_row_session_name"><?php echo $event->event_get('title'); ?></span>
 											<?php if ($event->event_shares_start_end_date()): ?>
 												<span class="d-block text-secondary fs-7"><?php echo date('M j, Y', strtotime($event->event_get('event_start'))) . " " . date('g:i a', strtotime($event->event_get('event_start'))) . " &ndash; " . date('g:i a', strtotime($event->event_get('event_end'))); ?></span>
@@ -132,6 +135,9 @@ if (User::user_is_admin($user->user_get_attribute('userID')) == TRUE)
 											<span class="text-secondary-emphasis fs-7 d-block">End: <span class="text-secondary fs-7"><?php echo date('M j, Y g:i a', strtotime($event->event_get('event_end'))); ?></span></span>
 											<?php endif; ?>
 										</p>
+										<?php if (!empty($conflicts) && in_array($event->event_get('eventID'), array_keys($conflicts))): ?>
+										<span class="badge rounded-pill text-bg-danger fs-8">Conflict</span>
+										<?php endif; ?>
 										<?php endforeach; ?>
 									</div>
 								</div>

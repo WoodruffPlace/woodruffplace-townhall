@@ -264,7 +264,6 @@ if (isset($_SESSION['alert']))
 					<!-- Sessions list -->
 					<div class="row my-4">
 						<div class="col-12">
-							<?php Event::events_are_overlapping($_SESSION['form']['sessions']); ?>
 							<?php if (Event::events_are_overlapping($_SESSION['form']['sessions'])): ?>
 							<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
 								<p class="my-0 fs-7 fw-bold">You have overlapping events. Is this intentional?
@@ -336,9 +335,10 @@ if (isset($_SESSION['alert']))
 						$total = 0;
 						// Determine the cleaning fee and security deposit (if any)
 						// Note: request_get_fees returns the appropriate price IDs of the respective fees, not the amounts
-						$fees = Request::request_get_fees($_SESSION['form']['sessions'], $config['products']['cleaning'], $config['products']['security']);
+						$fees = Request::request_get_fees($_SESSION['form']['sessions']);
 						if (!empty($fees)):
-						$sessions_waived = Event::event_return_sessions_discounted($_SESSION['form']['sessions']);
+						// Check for sessions that should be discounted because of > 1 sessions per day
+						$sessions_waived = Event::event_return_sessions_discounted_new($_SESSION['form']['sessions']);
 						// Per setting, check if we should max rental charges per day
 						if ($GLOBALS['settings']->get('request.one_charge_daily') == "1" && (!empty($sessions_waived) && count($sessions_waived) >= 1)):
 						?>

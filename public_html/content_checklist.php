@@ -41,7 +41,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'payment.submit')
 {
 	// Update the request with both the checklist complete and the notes
 	$request->request_update('customer_checklist_complete', '1');
-	$request->status_update('ended_pending');
+	$request->status_update('ended_inspect');
 	$feedback = Utility::form_field_parse($_POST['feedback']);
 	$request->request_update('customer_checklist_comments', $feedback);
 

@@ -9,7 +9,7 @@ $event = null;
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
 try
 {
-	$event = \Stripe\Webhook::constructEvent($payload, $sig_header, $config['stripe_webhook_secret']);
+	$event = \Stripe\Webhook::constructEvent($payload, $sig_header, $GLOBALS['config']['stripe_webhook_secret']);
 
 	// Process the event
 	switch ($event->type)
@@ -30,8 +30,8 @@ try
 				$request->status_update('scheduled');
 
 				// Send notification email
-				$message = "Town Hall Committee,\n\nThis email is to notify you that the invoice for the following Town Hall rental has been paid:\n\n". $request->request_get('title') . "\n\n***\nView and manage requests:\n". $config['env']['protocol'] . "://" . $config['env']['host'] . "\n***\n\n--\nWoodruff Place Civic League\nhttps://WoodruffPlace.org";
-				Utility::mailer_helper($mail, $config['notification_internal_requests'], 'Town Hall rental paid: ' . $request->request_get('title'), $message);
+				$message = "Town Hall Committee,\n\nThis email is to notify you that the invoice for the following Town Hall rental has been paid:\n\n". $request->request_get('title') . "\n\n***\nView and manage requests:\n". $GLOBALS['config']['env']['protocol'] . "://" . $GLOBALS['config']['env']['host'] . "\n***\n\n--\nWoodruff Place Civic League\nhttps://WoodruffPlace.org";
+				Utility::mailer_helper($mail, $GLOBALS['config']['notification_internal_requests'], 'Town Hall rental paid: ' . $request->request_get('title'), $message);
 			}
 		break;
 		default:

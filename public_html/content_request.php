@@ -17,6 +17,12 @@ if (Request::request_is_valid($id))
 	// Create request
 	$request = new Request($id);
 
+	// Get all request sessions
+	$sessions = $request->request_get_sessions();
+
+	// Get any session conflicts
+	$conflicts = Request::get_conflict_map();
+
 	// Create customer
 	$customer = new Customer($request->request_get('customer'));
 }
@@ -46,7 +52,9 @@ if (isset($_POST['action']))
 		break;
 		case 'session_edit':
 			$_SESSION['alert'] = 'session-saved';
-			FormProcessor::form_process_session('edit', NULL, Utility::form_field_parse($_POST['session_to_edit']));
+			FormProcessor::form_process_session('edit', $request, Utility::form_field_parse($_POST['session_to_edit']));
+			// Update the fees for the overall request
+			$request->request_update_fees();
 			header("Location: " . '/request?id=' . $request->request_get('requestID'));
 			exit;
 		break;
@@ -366,6 +374,28 @@ if (isset($_SESSION['alert']))
 							</div>
 						</div>
 					</div>
+					<?php
+					// Error for session conflicts
+					$message = '';
+					if (!empty(array_intersect_key($conflicts, array_flip($sessions)))):
+						$message = 'This request contains event conflicts.';
+						foreach (array_intersect_key($conflicts, array_flip($sessions)) as $key => $value)
+						{
+							foreach ($value as $e)
+							{
+								$newEvent = new Event($e);
+								if ($newEvent->event_get('requestID') != $request->request_get('requestID'))
+								{
+									$newRequest = new Request($newEvent->event_get('requestID'));
+									$message .= '<br><a href="/request?id=' . $newRequest->request_get('requestID') . '">' . $newRequest->request_get('title') . '</a>';
+								}
+							}
+						}
+					?>
+					<div class="alert alert-danger mt-3" role="alert">
+						<p class="my-0"><?php echo $message; ?></p>
+					</div>
+					<?php endif; ?>
 					<div class="row">
 						<div class="col-12">
 							<div class="mt-2 d-lg-none">
@@ -380,6 +410,14 @@ if (isset($_SESSION['alert']))
 							</div>
 						</div>
 					</div>
+					<?php
+					// Shortcut button for Town Hall inspections
+					if ($request->request_get('status') == 'ended_inspect'):
+					?>
+					<a href="#" class="btn btn-success d-block d-sm-inline-flex d-lg-none px-4 py-2 my-3" data-bs-toggle="modal" data-bs-target="#modal_inspect" aria-expanded="false" aria-controls="modal_inspect">Town Hall inspection</a>
+					<?php endif; ?>
+
+
 					<?php if ($mode_edit != "true" && $request->is_editable()): ?>
 					<div class="row mb-2">
 						<div class="col-12 justify-content-md-end d-flex">
@@ -662,6 +700,17 @@ if (isset($_SESSION['alert']))
 							</div>
 						</div>
 					</div>
+					<?php
+					// Check for any waived sessions
+					$sessions_waived = $request->request_return_sessions_discounted($sessions);
+
+					// Per setting, check if we should max rental charges per day
+					if ($GLOBALS['settings']->get('request.one_charge_daily') == "1" && (!empty($sessions_waived) && count($sessions_waived) >= 1)):
+					?>
+					<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+						<p class="my-0 fs-7 fst-italic fw-normal">We charge a maximum of one rental fee per day (as determined by the largest event), regardless of whether the customer requests multiple sessions.<br><br>Note: the lower-priced sessions should automatically be fee-waived on customer-requested sessions, but NOT on sessions you add manually. All settings can be overridden. Please double-check prior to approval.</p>
+					</div>
+					<?php endif; ?>
 					<!-- Sessions list -->
 					<div class="row">
 						<div class="col-12">
@@ -673,7 +722,6 @@ if (isset($_SESSION['alert']))
 								<div class="col-1 d-none"><span class="text-body-emphasis fw-medium fs-7"></span></div>
 							</div>
 							<?php
-							$sessions = $request->request_get_sessions();
 							foreach ($sessions as $session):
 							$event = new Event($session);
 							$fee_rental = (!empty($event->event_get('fee_rental'))) ? new Price($event->event_get('fee_rental')) : null;
@@ -690,6 +738,9 @@ if (isset($_SESSION['alert']))
 										<span class="text-secondary-emphasis fs-7 d-block">End: <span class="text-secondary fs-7"><?php echo date('M j, Y g:i a', strtotime($event->event_get('event_end'))); ?></span></span>
 										<?php endif; ?>
 									</span>
+									<?php if (!empty($conflicts) && in_array($event->event_get('eventID'), array_keys($conflicts))): ?>
+									<span class="badge rounded-pill text-bg-danger fs-8">Conflict</span>
+									<?php endif; ?>
 								</div>
 								<?php $css_fee_rental = ($event->event_get('fee_waiver_rental') == "1") ? "text-decoration-line-through" : ""; ?>
 								<div class="col-2"><span class="text-body fs-7"><?php echo $fee_rental->price_get('field_request_label'); ?></span><span class="d-block text-secondary fs-7 <?php echo $css_fee_rental; ?>"><?php echo "$" . round($fee_rental->price_get('amount'), 2); ?></span></div>
@@ -844,7 +895,7 @@ if (isset($_SESSION['alert']))
 									</div>
 									<?php endif; ?>
 									<!-- Inspection -->
-									<?php if ($request->request_get('status') == 'ended_pending'): ?>
+									<?php if ($request->request_get('status') == 'ended_inspect'): ?>
 									<ul class="mt-3">
 										<li><a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#modal_inspect" aria-expanded="false" aria-controls="modal_inspect">Town Hall inspection</a></li>
 									</ul>
@@ -857,10 +908,7 @@ if (isset($_SESSION['alert']))
 								// Form initial state or no sessions in list
 								$total = "-";
 								$total = 0;
-								// Determine the cleaning fee and security deposit (if any)
-								// Note: request_get_fees returns the appropriate price IDs of the respective fees, not the amounts
-								$fees = Request::request_get_fees($sessions, $GLOBALS['config']['products']['cleaning'], $GLOBALS['config']['products']['security']);
-
+								// Loop the sessions
 								foreach ($sessions as $session):
 								$event = new Event($session);
 								$fee_rental = (!empty($event->event_get('fee_rental'))) ? new Price($event->event_get('fee_rental')) : null;
@@ -887,6 +935,9 @@ if (isset($_SESSION['alert']))
 											</div>
 										</div>
 									</div>
+									<?php if (!empty($conflicts) && in_array($event->event_get('eventID'), array_keys($conflicts))): ?>
+									<span class="badge rounded-pill text-bg-danger fs-9">Conflict</span>
+									<?php endif; ?>
 									<?php if (!empty($event->event_get('fee_alcohol'))) : ?>
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="left fw-light fs-6">
@@ -907,7 +958,8 @@ if (isset($_SESSION['alert']))
 								<?php
 								// Initialize total_unwaived
 								$total_unwaived = $total;
-								$fee_cleaning = new Price($fees['cleaning']);
+								// Determine the cleaning fee and security deposit (if any)
+								$fee_cleaning = new Price($request->request_get('cleaning_fee'));
 								if (intval($fee_cleaning->price_get('amount')) > 0):
 								$form_waivers_disable = (!$request->is_prepayment() || $request->request_get('is_wp_event') == "1") ? "disabled" : "";
 								?>
@@ -945,7 +997,7 @@ if (isset($_SESSION['alert']))
 								<!-- End cleaning fee -->
 								<!-- Security deposit, if applicable -->
 								<?php
-								$fee_security = new Price($fees['security']);
+								$fee_security = new Price($request->request_get('security_deposit'));
 								if (intval($fee_security->price_get('amount')) > 0):
 								?>
 								<div class="mb-2 pb-2 border-bottom border-secondary-subtle">
