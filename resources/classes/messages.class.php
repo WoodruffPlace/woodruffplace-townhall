@@ -83,7 +83,6 @@ class Messages
 	// Send a confirmation to an INTERNAL customer upon approval
 	public static function customer_internal_request_approval($request)
 	{
-		global $config;
 		$requestor = new Customer($request->request_get('customer'));
 		$message = $requestor->customer_get('name_first') . ",\n\nYour request to use Woodruff Place Town Hall for the following event has been approved:\n\n";
 		$message .= $request->request_get('title') . "\n";
@@ -151,7 +150,6 @@ class Messages
 	// Send a notification to the Town Hall committee for checklist completed
 	public static function committee_notification_checklist_submit($request)
 	{
-		global $config;
 		$message = "Town Hall Committee,\n\nThe closing event checklist has been submitted on behalf of the following event:\n\n";
 		$message .= $request->request_get('title') . "\n\n";
 		$message .= "At your earliest convenience, please inspect Town Hall and either approve or deny the closing. Remember: this affects the return of the customer's security deposit.";
@@ -172,6 +170,42 @@ class Messages
 		$message .= $requestor->customer_get('name_first') . " " . $requestor->customer_get('name_last') . "\n" . $requestor->customer_get('email');
 		$message .= "\n\n";
 		$message .= "Please coordinate with the Town Hall Monitors committee with any questions." . $GLOBALS['config']['mail']['signature'];
+		return $message;
+	}
+
+	/**
+	 *
+	 *  TEMPORARY
+	 *
+	 */
+
+	// Send an email to the customer with the invoice pay link
+	public static function customer_send_invoice_paylink($request, $url)
+	{
+		$requestor = new Customer($request->request_get('customer'));
+		$message = $requestor->customer_get('name_first') . ",\n\nYour rental request for Woodruff Place Town Hall for the following event has been approved:\n\n";
+		$message .= $request->request_get('title') . "\n";
+		foreach ($request->request_get_sessions() as $session)
+		{
+			$event = new Event($session);
+			$message .= (!empty($event->event_get('title'))) ? "\n" . $event->event_get('title') . "\n" : '';
+			if ($event->event_shares_start_end_date())
+			{
+				$message .= date('M j, Y', strtotime($event->event_get('event_start'))) . ": " . date('g:i a', strtotime($event->event_get('event_start'))) . " - " . date('g:i a', strtotime($event->event_get('event_end')));
+			}
+			else
+			{
+				$message .= "Start: " . date('M j, Y g:i a', strtotime($event->event_get('event_start'))) . "\n";
+				$message .= "End: " . date('M j, Y g:i a', strtotime($event->event_get('event_end')));
+			}
+			$message .= "\n";
+		}
+		$message .= "\nPlease pay the invoice at your earliest convenience. Your dates are not confirmed until payment is made.";
+		$message .= "\n";
+		$message .= "\n";
+		$message .= $url;
+		$message .= "\n\nPlease do not hesitate to reach out to the Town Hall committee with any questions or for any assistance you may require." . $GLOBALS['config']['mail']['signature'];
+		$message .= "\n\n*****\nNote: this email is temporary and for testing purposes only. The production environment will feature Stripe-branded emails.";
 		return $message;
 	}
 

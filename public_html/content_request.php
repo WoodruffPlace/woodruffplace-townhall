@@ -961,7 +961,7 @@ if (isset($_SESSION['alert']))
 								// Determine the cleaning fee and security deposit (if any)
 								$fee_cleaning = new Price($request->request_get('cleaning_fee'));
 								if (intval($fee_cleaning->price_get('amount')) > 0):
-								$form_waivers_disable = (!$request->is_prepayment() || $request->request_get('is_wp_event') == "1") ? "disabled" : "";
+								$form_waivers_disable_cleaning = (!$request->is_prepayment() || $request->request_get('is_wp_event') == "1") ? "disabled" : "";
 								?>
 								<div class="mb-2 pb-2 border-bottom border-secondary-subtle">
 									<div class="d-flex justify-content-between">
@@ -979,7 +979,7 @@ if (isset($_SESSION['alert']))
 												role="switch"
 												value="y"
 												name="form_fee_cleaning_waiver"
-												<?php echo $form_waivers_disable; ?>
+												<?php echo $form_waivers_disable_cleaning; ?>
 												<?php echo Utility::form_check_if_checked($request->fee_waived('cleaning'), true, 'checked'); ?>
 												id="form_fee_cleaning_waiver">
 										<label class="form-check-label text-secondary fs-7" for="form_fee_cleaning_waiver">Waive cleaning fee</label>
@@ -999,6 +999,7 @@ if (isset($_SESSION['alert']))
 								<?php
 								$fee_security = new Price($request->request_get('security_deposit'));
 								if (intval($fee_security->price_get('amount')) > 0):
+								$form_waivers_disable_security = (!$request->is_prepayment() || $request->request_get('is_wp_event') == "1") ? "disabled" : "";
 								?>
 								<div class="mb-2 pb-2 border-bottom border-secondary-subtle">
 									<div class="d-flex justify-content-between">
@@ -1016,7 +1017,7 @@ if (isset($_SESSION['alert']))
 												role="switch"
 												value="y"
 												name="form_fee_security_waiver"
-												<?php echo $form_waivers_disable; ?>
+												<?php echo $form_waivers_disable_security; ?>
 												<?php echo Utility::form_check_if_checked($request->fee_waived('security'), true, 'checked'); ?>
 												id="form_fee_security_waiver">
 										<label class="form-check-label text-secondary fs-7" for="form_fee_security_waiver">Waive security deposit</label>

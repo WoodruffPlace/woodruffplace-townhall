@@ -478,6 +478,18 @@ class Request
 				$valid = false;
 			}
 		}
+
+		/**
+		 *  TEMPORARY
+		 */
+		// Finalize invoice and send the customer an email with the hosted payment URL
+		global $mail;
+		$stripe = new \Stripe\StripeClient($GLOBALS['config']['stripe_api_key']);
+		$invoice_finalized = $stripe->invoices->finalizeInvoice($invoice->id);
+		$message = Messages::customer_send_invoice_paylink($this, $invoice_finalized->hosted_invoice_url);
+		Utility::mailer_helper($mail, $customer->customer_get('email'), "Town Hall rental approved, payment due", $message, 'Woodruff Place');
+		/* * * * * * * TEMP END * * * * * */
+
 		return $valid;
 	}
 

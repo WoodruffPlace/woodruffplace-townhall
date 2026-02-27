@@ -1,5 +1,4 @@
 <?php
-
 class StripeInterface
 {
 	public static $stripe_api_key;
