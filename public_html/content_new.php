@@ -496,11 +496,11 @@ if (isset($_SESSION['alert']))
 									<div class="row">
 										<div class="col-12 col-md-6">
 											<label for="form_event_date_start_1" class="form-label text-secondary">Start date</label>
-											<input type="date" name="session_start_date" class="form-control" id="form_event_date_start_1" required>
+											<input type="date" name="session_start_date" class="form-control form_event_date_select" id="form_event_date_start_1" required>
 										</div>
 										<div class="col-12 col-md-6">
 											<label for="form_event_time_start_1" class="form-label text-secondary">Start time</label>
-											<input type="time" name="session_start_time" class="form-control" id="form_event_time_start_1" required>
+											<input type="time" name="session_start_time" class="form-control form_event_date_select" id="form_event_time_start_1" required>
 										</div>
 									</div>
 									<div class="row mt-4 pt-3">
