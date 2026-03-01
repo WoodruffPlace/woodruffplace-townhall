@@ -1,16 +1,6 @@
 // Document ready functions
 $(document).ready(function()
 {
-	// Limit date fields to future dates only
-	// Get today's date
-	var today = new Date().toISOString().split('T')[0];
-	// Set the minimum selectable date to today
-	var date_felds = document.getElementsByClassName("form_event_date_select");
-	for (var i = 0; i < date_felds.length; i++)
-	{
-		date_felds[i].setAttribute("min", today);
-	}
-
 	// Listen for changes to the main/billing contact form
 	form_requestcontact_check_validity();
 	$('.form_request_contact').change(function()

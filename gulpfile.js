@@ -61,6 +61,7 @@ var jsFiles =
     sourcePath + 'checklist.js',
     sourcePath + 'request_list_filters.js',
     sourcePath + 'request_list_search.js',
+    sourcePath + 'date.js',
     sourcePath + 'app.js',
 ];
 
